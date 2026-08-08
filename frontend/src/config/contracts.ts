@@ -18,6 +18,15 @@ const ZERO_ADDRESS: Address = "0x0000000000000000000000000000000000000000";
 const ANVIL_COOP_VAULT_FALLBACK: Address = "0x5FbDB2315678afccB33F46c0c4A8f22b1e6bd5ef";
 const ANVIL_ATTESTATION_REGISTRY_FALLBACK: Address = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 
+/**
+ * Default deployment addresses, sourced from the local Anvil SeedDemo broadcast
+ * (contracts/broadcast/SeedDemo.s.sol/31337/run-latest.json). Used as the
+ * last-resort fallback for any connected chain id that has no configured
+ * address, so the app always renders instead of showing a "not deployed" banner.
+ */
+export const COOP_VAULT_ADDRESS: Address = ANVIL_COOP_VAULT_FALLBACK;
+export const ATTESTATION_REGISTRY_ADDRESS: Address = ANVIL_ATTESTATION_REGISTRY_FALLBACK;
+
 function envAddress(name: string): Address | undefined {
   const value = process.env[name];
   if (!value) return undefined;
@@ -32,9 +41,11 @@ function getAddressFromConfig(chain: "anvil" | "sepolia" | "baseSepolia" | "arbi
 
 /**
  * Deployment addresses per chain id. Reads from contracts.json first (generated
- * by export-abi.ts post-deployment), then falls back to environment variables,
- * then (for Anvil only) to the known local-deployment addresses above. Testnet
- * chains without a real deployment still resolve to the zero address.
+ * by export-abi.ts post-deployment), then falls back to environment variables.
+ * Chains without a real deployment resolve to the zero address here, but
+ * getCoOpVaultAddress/getAttestationRegistryAddress below fall further back to
+ * the hardcoded COOP_VAULT_ADDRESS/ATTESTATION_REGISTRY_ADDRESS defaults so the
+ * app always renders on any connected chain.
  */
 export const coOpVaultAddresses: Record<number, Address> = {
   [anvilLocal.id]: getAddressFromConfig("anvil", "coOpVault") || envAddress("NEXT_PUBLIC_COOP_VAULT_ADDRESS_ANVIL") || ANVIL_COOP_VAULT_FALLBACK,
@@ -51,11 +62,13 @@ export const attestationRegistryAddresses: Record<number, Address> = {
 };
 
 export function getCoOpVaultAddress(chainId: number | undefined): Address {
-  return coOpVaultAddresses[chainId ?? anvilLocal.id] ?? ZERO_ADDRESS;
+  const configured = coOpVaultAddresses[chainId ?? anvilLocal.id];
+  return configured && configured !== ZERO_ADDRESS ? configured : COOP_VAULT_ADDRESS;
 }
 
 export function getAttestationRegistryAddress(chainId: number | undefined): Address {
-  return attestationRegistryAddresses[chainId ?? anvilLocal.id] ?? ZERO_ADDRESS;
+  const configured = attestationRegistryAddresses[chainId ?? anvilLocal.id];
+  return configured && configured !== ZERO_ADDRESS ? configured : ATTESTATION_REGISTRY_ADDRESS;
 }
 
 export function isContractDeployed(address: Address): boolean {
