@@ -15,7 +15,7 @@ const ZERO_ADDRESS: Address = "0x0000000000000000000000000000000000000000";
  * app usable out of the box (locally and on Vercel demo deploys) even if
  * contracts.json hasn't been regenerated and env vars aren't set.
  */
-const ANVIL_COOP_VAULT_FALLBACK: Address = "0x5FbDB2315678afccB33F46c0c4A8f22b1e6bd5ef";
+const ANVIL_COOP_VAULT_FALLBACK: Address = "0x5fbdB2315678afcCB33f46c0c4A8f22b1E6BD5Ef";
 const ANVIL_ATTESTATION_REGISTRY_FALLBACK: Address = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 
 /**
